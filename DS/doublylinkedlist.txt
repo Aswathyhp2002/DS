@@ -1,0 +1,158 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for a doubly linked list
+struct Node {
+    int data;
+    struct Node* next;
+    struct Node* prev;
+};
+
+// DoublyLinkedList structure
+struct DoublyLinkedList {
+    struct Node* head;
+    struct Node* tail;
+};
+
+// Function to initialize an empty doubly linked list
+void initializeList(struct DoublyLinkedList* dll) {
+    dll->head = dll->tail = NULL;
+}
+
+// Function to insert a new node at the beginning of the list
+void insertAtBeginning(struct DoublyLinkedList* dll, int value) {
+    // Create a new node and update links
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+
+    if (dll->head == NULL) {
+        dll->head = dll->tail = newNode;
+    } else {
+        newNode->next = dll->head;
+        dll->head->prev = newNode;
+        dll->head = newNode;
+    }
+
+    printf("%d inserted at the beginning.\n", value);
+}
+
+// Function to insert a new node at the end of the list
+void insertAtEnd(struct DoublyLinkedList* dll, int value) {
+    // Create a new node and update links
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = value;
+
+    if (dll->head == NULL) {
+        dll->head = dll->tail = newNode;
+    } else {
+        dll->tail->next = newNode;
+        newNode->prev = dll->tail;
+        dll->tail = newNode;
+    }
+
+    printf("%d inserted at the end.\n", value);
+}
+
+// Function to delete a node with the given value from the list
+void deleteNode(struct DoublyLinkedList* dll, int value) {
+    if (dll->head == NULL) {
+        printf("List is empty. Cannot delete from an empty list.\n");
+        return;
+    }
+
+    struct Node* current = dll->head;
+
+    while (current != NULL) {
+        if (current->data == value) {
+            if (current->prev != NULL) {
+                current->prev->next = current->next;
+            } else {
+                dll->head = current->next;
+            }
+
+            if (current->next != NULL) {
+                current->next->prev = current->prev;
+            } else {
+                dll->tail = current->prev;
+            }
+
+            free(current);
+            printf("%d deleted from the list.\n", value);
+            return;
+        }
+
+        current = current->next;
+    }
+
+    printf("%d not found in the list. Cannot delete.\n", value);
+}
+// Function to display the elements in the doubly linked list
+void display(struct DoublyLinkedList* dll) {
+    if (dll->head == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+
+    printf("Elements in the list: ");
+    struct Node* current = dll->head;
+
+    while (current != NULL) {
+        printf("%d ", current->data);
+        current = current->next;
+    }
+
+    printf("\n");
+}
+
+int main() {
+    struct DoublyLinkedList dll;
+    initializeList(&dll);
+
+    int choice, element;
+
+    do {
+        printf("\nDoubly Linked List Operations:\n");
+        printf("1. Insert at Beginning\n");
+        printf("2. Insert at End\n");
+        printf("3. Delete a Node\n");
+        printf("4. Display\n");
+        printf("0. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the element to insert at the beginning: ");
+                scanf("%d", &element);
+                insertAtBeginning(&dll, element);
+                break;
+
+            case 2:
+                printf("Enter the element to insert at the end: ");
+                scanf("%d", &element);
+                insertAtEnd(&dll, element);
+                break;
+           case 3:
+                printf("Enter the element to delete: ");
+                scanf("%d", &element);
+                deleteNode(&dll, element);
+                break;
+
+            case 4:
+                display(&dll);
+                break;
+
+            case 0:
+                printf("Exiting the program.\n");
+                break;
+
+            default:
+                printf("Invalid choice. Please enter a valid option.\n");
+        }
+    } while (choice != 0);
+
+    // TODO: Add cleanup logic (free allocated memory)
+
+    return 0;
+}
+

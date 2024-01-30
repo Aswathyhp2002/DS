@@ -1,0 +1,128 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent an edge in the graph
+struct Edge {
+    int src, dest, weight;
+};
+
+// Structure to represent a disjoint-set (used in union-find)
+struct DisjointSet {
+    int *parent, *rank;
+    int n;
+};
+
+// Function prototypes
+struct DisjointSet* createSet(int n);
+int find(struct DisjointSet* set, int i);
+void unionSets(struct DisjointSet* set, int x, int y);
+int compareEdges(const void* a, const void* b);
+void kruskalMST(struct Edge* edges, int n, int m);
+
+int main() {
+    int n, m;
+
+    // Get the number of vertices and edges
+    printf("Enter the number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter the number of edges: ");
+    scanf("%d", &m);
+
+    struct Edge* edges = (struct Edge*)malloc(m * sizeof(struct Edge));
+
+    // Get edge information from the user
+    printf("Enter edges (source destination weight):\n");
+    for (int i = 0; i < m; i++) {
+        scanf("%d %d %d", &edges[i].src, &edges[i].dest, &edges[i].weight);
+    }
+
+    // Find the Minimum Spanning Tree using Kruskal's algorithm
+ kruskalMST(edges, n, m);
+
+    free(edges);
+
+    return 0;
+}
+
+// Create a disjoint-set with 'n' sets
+struct DisjointSet* createSet(int n) {
+    struct DisjointSet* set = (struct DisjointSet*)malloc(sizeof(struct DisjointSet));
+    set->n = n;
+    set->parent = (int*)malloc(n * sizeof(int));
+    set->rank = (int*)malloc(n * sizeof(int));
+
+    // Initialize each set as a standalone set with rank 0
+    for (int i = 0; i < n; i++) {
+        set->parent[i] = i;
+        set->rank[i] = 0;
+    }
+
+    return set;
+}
+
+// Find the set to which an element 'i' belongs
+int find(struct DisjointSet* set, int i) {
+    // Path compression
+    if (set->parent[i] != i) {
+        set->parent[i] = find(set, set->parent[i]);
+    }
+    return set->parent[i];
+}
+
+// Union two sets using union by rank
+void unionSets(struct DisjointSet* set, int x, int y) {
+    int rootX = find(set, x);
+    int rootY = find(set, y);
+
+    // Union by rank
+    if (set->rank[rootX] < set->rank[rootY]) {
+        set->parent[rootX] = rootY;
+    } else if (set->rank[rootX] > set->rank[rootY]) {
+        set->parent[rootY] = rootX;
+    } else {
+        set->parent[rootY] = rootX;
+        set->rank[rootX]++;
+    }
+}
+// Compare function for sorting edges based on weight
+int compareEdges(const void* a, const void* b) {
+    return ((struct Edge*)a)->weight - ((struct Edge*)b)->weight;
+}
+
+// Kruskal's algorithm to find Minimum Spanning Tree
+void kruskalMST(struct Edge* edges, int n, int m) {
+    // Sort edges in non-decreasing order of weight
+    qsort(edges, m, sizeof(struct Edge), compareEdges);
+
+    // Create a disjoint-set with 'n' sets
+    struct DisjointSet* set = createSet(n);
+
+    printf("Edges in the Minimum Spanning Tree:\n");
+
+    int edgeCount = 0;
+    int totalCost = 0;
+    int i = 0;
+    while (edgeCount < n - 1 && i < m) {
+        // Consider the next edge in the sorted order
+        struct Edge currentEdge = edges[i++];
+
+        int x = find(set, currentEdge.src);
+        int y = find(set, currentEdge.dest);
+
+        // Check if including this edge does not form a cycle
+        if (x != y) {
+            printf("%d -> %d (Weight: %d)\n", currentEdge.src, currentEdge.dest, currentEdge.weight);
+            edgeCount++;
+            totalCost += currentEdge.weight;
+            // Union the sets of the source and destination vertices
+            unionSets(set, x, y);
+        }
+    }
+
+    printf("Total Cost of Minimum Spanning Tree: %d\n", totalCost);
+
+    // Free allocated memory
+    free(set->parent);
+    free(set->rank);
+    free(set);
+}

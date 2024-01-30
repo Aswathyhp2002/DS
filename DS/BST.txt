@@ -1,0 +1,166 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Node structure for a binary search tree
+struct TreeNode {
+    int data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+};
+
+// BinarySearchTree structure
+struct BinarySearchTree {
+    struct TreeNode* root;
+};
+
+// Helper function for inserting a value into the BST
+struct TreeNode* bstInsert(struct TreeNode* node, int value) {
+    if (node == NULL) {
+        struct TreeNode* newNode = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+        newNode->data = value;
+        newNode->left = newNode->right = NULL;
+        return newNode;
+    }
+
+    if (value < node->data) {
+        node->left = bstInsert(node->left, value);
+    } else if (value > node->data) {
+     node->right = bstInsert(node->right, value);
+    }
+
+    return node;
+}
+
+// Helper function for finding the minimum value node in a subtree
+struct TreeNode* findMin(struct TreeNode* node) {
+    while (node->left != NULL) {
+        node = node->left;
+    }
+    return node;
+}
+
+// Helper function for deleting a value from the BST
+struct TreeNode* bstRemoveNode(struct TreeNode* node, int value) {
+    if (node == NULL) {
+        return NULL;
+    }
+
+    if (value < node->data) {
+        node->left = bstRemoveNode(node->left, value);
+    } else if (value > node->data) {
+        node->right = bstRemoveNode(node->right, value);
+    } else {
+        // Node to be deleted found
+
+        // Case 1: Node with only one child or no child
+        if (node->left == NULL) {
+            struct TreeNode* temp = node->right;
+            free(node);
+  return temp;
+        } else if (node->right == NULL) {
+            struct TreeNode* temp = node->left;
+            free(node);
+            return temp;
+        }
+
+        // Case 2: Node with two children
+        struct TreeNode* temp = findMin(node->right);
+        node->data = temp->data;
+        node->right = bstRemoveNode(node->right, temp->data);
+    }
+
+    return node;
+}
+
+// Helper function for inorder traversal
+void treeNodeInorderTraversal(struct TreeNode* node) {
+    if (node != NULL) {
+        treeNodeInorderTraversal(node->left);
+        printf("%d ", node->data);
+        treeNodeInorderTraversal(node->right);
+    }
+}
+
+// Public function to insert a value into the BST
+void bstInsertValue(struct BinarySearchTree* bst, int value) {
+    bst->root = bstInsert(bst->root, value);
+}
+
+// Public function to delete a value from the BST
+void bstRemoveValue(struct BinarySearchTree* bst, int value) {
+    bst->root = bstRemoveNode(bst->root, value);
+}
+
+// Public function to check if a value is present in the BST
+int bstSearch(struct BinarySearchTree* bst, int value) {
+    struct TreeNode* current = bst->root;
+
+    while (current != NULL) {
+        if (value == current->data) {
+            return 1; // Found
+        } else if (value < current->data) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+
+    return 0; // Not Found
+}
+
+// Public function to perform inorder traversal
+void bstInorderTraversal(struct BinarySearchTree* bst) {
+    treeNodeInorderTraversal(bst->root);
+    printf("\n");
+}
+
+int main() {
+    struct BinarySearchTree bst;
+    bst.root = NULL;
+
+ int choice, value;
+
+    do {
+        printf("\nBinary Search Tree Operations:\n");
+        printf("1. Insert\n");
+        printf("2. Remove\n");
+        printf("3. Search\n");
+        printf("4. Inorder Traversal\n");
+        printf("0. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the value to insert: ");
+                scanf("%d", &value);
+                bstInsertValue(&bst, value);
+                break;
+
+            case 2:
+                printf("Enter the value to remove: ");
+                scanf("%d", &value);
+                bstRemoveValue(&bst, value);
+                break;
+
+            case 3:
+                printf("Enter the value to search: ");
+                scanf("%d", &value);
+                printf("%s\n", bstSearch(&bst, value) ? "Found" : "Not Found");
+                break;
+  case 4:
+                printf("Inorder Traversal: ");
+                bstInorderTraversal(&bst);
+                break;
+
+            case 0:
+                printf("Exiting the program.\n");
+                break;
+
+            default:
+                printf("Invalid choice. Please enter a valid option.\n");
+        }
+    } while (choice != 0);
+
+    return 0;
+}

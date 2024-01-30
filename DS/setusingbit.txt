@@ -1,0 +1,92 @@
+#include <stdio.h>
+
+#define SET_SIZE 64
+
+typedef struct {
+    unsigned long long bitString;
+} BitSet;
+
+void insertElement(BitSet* set, int element) {
+    if (element >= 0 && element < SET_SIZE) {
+        set->bitString |= (1ULL << element);
+    } else {
+        printf("Element %d is out of range. Ignoring.\n", element);
+    }
+}
+
+BitSet unionOperation(const BitSet* set1, const BitSet* set2) {
+    BitSet result;
+    result.bitString = set1->bitString | set2->bitString;
+    return result;
+}
+
+BitSet intersectionOperation(const BitSet* set1, const BitSet* set2) {
+    BitSet result;
+    result.bitString = set1->bitString & set2->bitString;
+    return result;
+}
+
+BitSet differenceOperation(const BitSet* set1, const BitSet* set2) {
+    BitSet result;
+    result.bitString = set1->bitString & ~(set1->bitString & set2->bitString);
+    return result;
+}
+
+void display(const BitSet* set) {
+    printf("Set Elements: ");
+    for (int i = 0; i < SET_SIZE; ++i) {
+        if ((set->bitString & (1ULL << i)) != 0) {
+            printf("%d ", i);
+   }
+    }
+    printf("\n");
+}
+
+int main() {
+    BitSet set1, set2;
+
+    // Initialize sets
+    set1.bitString = set2.bitString = 0;
+
+    // User input for Set 1
+    int element;
+    printf("Enter elements for Set 1 (enter -1 to finish):\n");
+    while (1) {
+        scanf("%d", &element);
+        if (element == -1) {
+            break;
+        }
+        insertElement(&set1, element);
+    }
+
+    // User input for Set 2
+    printf("Enter elements for Set 2 (enter -1 to finish):\n");
+    while (1) {
+        scanf("%d", &element);
+        if (element == -1) {
+            break;
+        }
+        insertElement(&set2, element);
+    }
+
+    printf("Set 1: ");
+    display(&set1);
+
+    printf("Set 2: ");
+    display(&set2);
+
+    BitSet unionSet = unionOperation(&set1, &set2);
+    printf("Union of Set 1 and Set 2: ");
+    display(&unionSet);
+
+    BitSet intersectionSet = intersectionOperation(&set1, &set2);
+    printf("Intersection of Set 1 and Set 2: ");
+    display(&intersectionSet);
+
+    BitSet differenceSet = differenceOperation(&set1, &set2);
+
+   printf("Difference of Set 1 and Set 2: ");
+    display(&differenceSet);
+
+    return 0;
+}
